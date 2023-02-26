@@ -18,7 +18,7 @@ def database_validation():
                 print("Введите полную директорию до файла базы данных (books.db): ")
                 DBpath = input()
                 if os.path.exists(DBpath) and os.path.basename(DBpath).endswith(".db"):
-                    shut.copy(DBpath,os.getcwd())
+                    shut.copy(DBpath, os.getcwd())
                     bookDB = sql.connect(os.path.basename(DBpath))
                     print("База данных успешно импортирована!")
                     break
@@ -46,7 +46,6 @@ def database_validation():
     );""")
 
 def DBSearch():
-    global bookDB
     cur = bookDB.cursor()
     print("Что будем просматривать?\n1. Вся библиотека\n2. Своя выборка")
     choice = int(input())
@@ -67,7 +66,7 @@ def DBSearch():
             if library != []:
                 for books in library:
                     for attribute in books:
-                        print(f'| {attribute} ',end="|")
+                        print(f'| {attribute} ', end="|")
                     print()
             else:
                 print("Ничего не найдено")
@@ -99,7 +98,7 @@ def DBUpdate():
                 print("Суммарное количество страниц в книге не может быть отрицательным.")
                 return None
             book_current_page = int(input("Введите страницу, на которой вы закончили чтение (если не начали - 0): "))
-            if not (0 < book_current_page < book_total_pages):
+            if not (0 <= book_current_page <= book_total_pages):
                 print("Введена некорректная текущая страница, она не может принимать отрицательное значение или быть больше суммарного количества страниц в книге.")
                 input()
                 return None
@@ -111,30 +110,30 @@ def DBUpdate():
                 book_completed = 0
             else:
                 raise TypeError
-            book_info = (book_id, book_name ,book_genre, book_total_pages, book_current_page, book_note, book_completed)
-            cur.execute("""INSERT INTO books (book_id,book_name,genre,total_pages,current_pages,note,complete) VALUES (?,?,?,?,?,?,?)""",book_info)
+            book_info = (book_id, book_name, book_genre, book_total_pages, book_current_page, book_note, book_completed)
+            cur.execute("""INSERT INTO books (book_id,book_name,genre,total_pages,current_pages,note,complete) VALUES (?,?,?,?,?,?,?)""", book_info)
             bookDB.commit()
             print("Книга успешно занесена в библиотеку!")
         except TypeError:
             print("Введены некорректные данные о книге")
         except sql.Error as error:
-            print("Ошибка записи в базу данных!\n",error)
+            print("Ошибка записи в базу данных!\n", error)
     elif choice == 2:
         #Если будут дубликаты?
         book_name = input("Введите название книги: ")
-        cur.execute("""SELECT COUNT(book_name) FROM books WHERE book_name LIKE ?""",(book_name,))
+        cur.execute("""SELECT COUNT(book_name) FROM books WHERE book_name LIKE ?""", (book_name,))
         result = cur.fetchone()[0]
         if result == 1:
             print("Что вы хотите изменить?\n1. Название книги\n2. Жанр\n3. Количество страниц в книге\n4. Текущую страницу\n5. Заметку\n6. Отметить книгу как прочитанную/не прочитанную")
             choice = int(input())
             if choice == 1:
                 new_name = input("Введите новое название книги: ")
-                cur.execute("UPDATE books SET book_name = ? WHERE book_name LIKE ?",(new_name,book_name,))
+                cur.execute("UPDATE books SET book_name = ? WHERE book_name LIKE ?", (new_name, book_name,))
                 bookDB.commit()
                 print("Статус книги успешно изменён")
             elif choice == 2:
                 new_genre = input("Введите новый жанр: ")
-                cur.execute("UPDATE books SET genre = ? WHERE book_name LIKE ?",(new_genre,book_name,))
+                cur.execute("UPDATE books SET genre = ? WHERE book_name LIKE ?", (new_genre, book_name,))
                 bookDB.commit()
                 print("Статус книги успешно изменён")
             elif choice == 3:
@@ -142,31 +141,31 @@ def DBUpdate():
                 if int(new_total) < 0:
                     print("Суммарное количество страниц в книге не может быть отрицательным")
                     return None
-                cur.execute("UPDATE books SET total_pages = ? WHERE book_name LIKE ?",(new_total,book_name,))
+                cur.execute("UPDATE books SET total_pages = ? WHERE book_name LIKE ?", (new_total, book_name,))
                 bookDB.commit()
                 print("Статус книги успешно изменён")
             elif choice == 4:
                 new_curpage = input("Введите страницу на которой вы остановили чтение: ")
-                cur.execute("""SELECT total_pages FROM books WHERE book_name LIKE ?""",(book_name,))
+                cur.execute("""SELECT total_pages FROM books WHERE book_name LIKE ?""", (book_name,))
                 actual_total_pages = cur.fetchone()[0]
                 print(actual_total_pages)
-                if not (0 < int(new_curpage) < actual_total_pages):
+                if not (0 <= int(new_curpage) <= actual_total_pages):
                     print("Введена некорректная текущая страница, она не может принимать отрицательное значение или быть больше суммарного количества страниц в книге.")
                     input()
                     return None
-                cur.execute("UPDATE books SET current_pages = ? WHERE book_name LIKE ?",(new_curpage,book_name,))
+                cur.execute("UPDATE books SET current_pages = ? WHERE book_name LIKE ?", (new_curpage, book_name,))
                 bookDB.commit()
                 print("Статус книги успешно изменён")
             elif choice == 5:
                 new_note = input("Введите новую заметку")
-                cur.execute("UPDATE books SET note = ? WHERE book_name LIKE ?",(new_note,book_name,))
+                cur.execute("UPDATE books SET note = ? WHERE book_name LIKE ?", (new_note, book_name,))
                 bookDB.commit()
                 print("Статус книги успешно изменён")
             elif choice == 6:
                 cur.execute("""SELECT complete FROM books WHERE book_name LIKE ?""", (book_name,))
                 result = cur.fetchone()[0]
                 if result == 0:
-                    cur.execute("UPDATE books SET complete = ? WHERE book_name LIKE ?",(1,book_name,))
+                    cur.execute("UPDATE books SET complete = ? WHERE book_name LIKE ?", (1, book_name,))
                 else:
                     cur.execute("UPDATE books SET complete = ? WHERE book_name LIKE ?", (0, book_name,))
                 print("Статус книги успешно изменён")
@@ -178,10 +177,10 @@ def DBUpdate():
             pass
     elif choice == 3:
         book_name = input("Введите название книги: ")
-        cur.execute("""SELECT COUNT(book_name) FROM books WHERE book_name LIKE ?""",(book_name,))
+        cur.execute("""SELECT COUNT(book_name) FROM books WHERE book_name LIKE ?""", (book_name,))
         result = cur.fetchone()[0]
         if result == 1:
-            cur.execute("""DELETE FROM books WHERE book_name = ?""",(book_name,))
+            cur.execute("""DELETE FROM books WHERE book_name = ?""", (book_name,))
             bookDB.commit()
             print(f"Книга {book_name} успешно удалена из библиотеки")
         elif result == 0:
