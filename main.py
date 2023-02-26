@@ -64,10 +64,13 @@ def DBSearch():
         try:
             cur.execute(sql_query)
             library = cur.fetchall()
-            for books in library:
-                for attribute in books:
-                    print(f'| {attribute} ',end="|")
-                print()
+            if library != []:
+                for books in library:
+                    for attribute in books:
+                        print(f'| {attribute} ',end="|")
+                    print()
+            else:
+                print("Ничего не найдено")
             input()
         except sql.Error as error:
             print("Ошибка выполнения SQL запроса:", error)
@@ -86,9 +89,20 @@ def DBUpdate():
             book_id = result[0] + 1
         try:
             book_name = input("*Введите название книги: ")
+            if book_name == "":
+                print("Обязательное поле: Название не может быть пустым!")
+                input()
+                return None
             book_genre = input("Введите жанр или тематику книги: ")
             book_total_pages = int(input("Введите суммарное количество страниц в книге: "))
+            if book_total_pages < 0:
+                print("Суммарное количество страниц в книге не может быть отрицательным.")
+                return None
             book_current_page = int(input("Введите страницу, на которой вы закончили чтение (если не начали - 0): "))
+            if not (0 < book_current_page < book_total_pages):
+                print("Введена некорректная текущая страница, она не может принимать отрицательное значение или быть больше суммарного количества страниц в книге.")
+                input()
+                return None
             book_note = input("Если треубется, введите заметку: ")
             book_completed = input("Вы завершили чтение книги? [Y/N]")
             if book_completed.lower() == 'y':
@@ -124,12 +138,22 @@ def DBUpdate():
                 bookDB.commit()
                 print("Статус книги успешно изменён")
             elif choice == 3:
-                new_total = tuple(input("Введите новое количество страниц в книге: "))
+                new_total = input("Введите новое количество страниц в книге: ")
+                if int(new_total) < 0:
+                    print("Суммарное количество страниц в книге не может быть отрицательным")
+                    return None
                 cur.execute("UPDATE books SET total_pages = ? WHERE book_name LIKE ?",(new_total,book_name,))
                 bookDB.commit()
                 print("Статус книги успешно изменён")
             elif choice == 4:
                 new_curpage = input("Введите страницу на которой вы остановили чтение: ")
+                cur.execute("""SELECT total_pages FROM books WHERE book_name LIKE ?""",(book_name,))
+                actual_total_pages = cur.fetchone()[0]
+                print(actual_total_pages)
+                if not (0 < int(new_curpage) < actual_total_pages):
+                    print("Введена некорректная текущая страница, она не может принимать отрицательное значение или быть больше суммарного количества страниц в книге.")
+                    input()
+                    return None
                 cur.execute("UPDATE books SET current_pages = ? WHERE book_name LIKE ?",(new_curpage,book_name,))
                 bookDB.commit()
                 print("Статус книги успешно изменён")
