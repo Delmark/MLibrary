@@ -127,12 +127,12 @@ def DBUpdate():
             print("Что вы хотите изменить?\n1. Название книги\n2. Жанр\n3. Количество страниц в книге\n4. Текущую страницу\n5. Заметку\n6. Отметить книгу как прочитанную/не прочитанную")
             choice = int(input())
             if choice == 1:
-                new_name = input("Введите новое название книги: ")
+                new_name = input("Введите новое название книги: ").strip()
                 cur.execute("UPDATE books SET book_name = ? WHERE book_name LIKE ?", (new_name, book_name,))
                 bookDB.commit()
                 print("Статус книги успешно изменён")
             elif choice == 2:
-                new_genre = input("Введите новый жанр: ")
+                new_genre = input("Введите новый жанр: ").strip()
                 cur.execute("UPDATE books SET genre = ? WHERE book_name LIKE ?", (new_genre, book_name,))
                 bookDB.commit()
                 print("Статус книги успешно изменён")
