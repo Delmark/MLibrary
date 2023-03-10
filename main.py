@@ -3,7 +3,7 @@ import sqlite3 as sql
 import shutil as shut
 
 
-global bookDB
+global bookDB   #Чё это за переменнная??
 
 def database_validation():
     global bookDB
